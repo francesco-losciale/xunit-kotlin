@@ -12,8 +12,12 @@ open class TestCase(private val testMethodName: String) {
         val testResult = TestResult()
         testResult.testStarted()
         setUp()
-        val method: Method = this::class.java.getDeclaredMethod(this.testMethodName)
-        method.invoke(this)
+        try {
+            val method: Method = this::class.java.getDeclaredMethod(this.testMethodName)
+            method.invoke(this)
+        } catch (e: Exception) {
+            testResult.testFailed()
+        }
         tearDown()
         return testResult
     }
@@ -28,6 +32,9 @@ class TestResult(private var runCount: Int = 0, private var failureCount: Int = 
 class WasRun(testMethodName: String): TestCase(testMethodName) {
     fun testMethod() {
         log += "testMethod "
+    }
+    fun testBrokenMethod() {
+        throw Exception()
     }
 }
 
@@ -48,10 +55,16 @@ class TestCaseTest(testMethodName: String) : TestCase(testMethodName) {
         testResult.testFailed()
         assert(testResult.summary() == "1 run, 1 failed")
     }
+    fun testFailedResult() {
+        val test = WasRun("testBrokenMethod")
+        val result = test.run()
+        assert(result.summary() == "1 run, 1 failed")
+    }
 }
 
 fun main() {
     TestCaseTest("testTemplateMethod").run()
     TestCaseTest("testResult").run()
     TestCaseTest("testFailedResultFormatting").run()
+    TestCaseTest("testFailedResult").run()
 }
