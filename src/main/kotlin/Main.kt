@@ -1,11 +1,15 @@
 import java.lang.reflect.Method
 
-class WasRun(private val testMethodName: String) {
-    var wasRun: Boolean = false
+open class TestCase(private val testMethodName: String) {
     fun run() {
         val method: Method = WasRun::class.java.getDeclaredMethod(testMethodName)
         method.invoke(this)
     }
+}
+
+class WasRun(testMethodName: String): TestCase(testMethodName) {
+    var wasRun: Boolean = false
+
     fun testMethod() {
         wasRun = true
     }
