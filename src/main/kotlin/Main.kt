@@ -2,7 +2,7 @@ import java.lang.reflect.Method
 
 open class TestCase(private val testMethodName: String) {
     fun run() {
-        val method: Method = WasRun::class.java.getDeclaredMethod(testMethodName)
+        val method: Method = this::class.java.getDeclaredMethod(this.testMethodName)
         method.invoke(this)
     }
 }
@@ -15,9 +15,15 @@ class WasRun(testMethodName: String): TestCase(testMethodName) {
     }
 }
 
+class TestCaseTest(testMethodName: String) : TestCase(testMethodName) {
+    fun testRunning() {
+        val test = WasRun("testMethod")
+        assert(!test.wasRun)
+        test.run()
+        assert(test.wasRun)
+    }
+}
+
 fun main() {
-    val test = WasRun("testMethod")
-    println(test.wasRun)
-    test.run()
-    println(test.wasRun)
+    TestCaseTest("testRunning").run()
 }
