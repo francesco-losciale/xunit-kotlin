@@ -1,7 +1,17 @@
-fun main(args: Array<String>) {
-    println("Hello World!")
 
-    // Try adding program arguments via Run/Debug configuration.
-    // Learn more about running applications: https://www.jetbrains.com/help/idea/running-applications.html.
-    println("Program arguments: ${args.joinToString()}")
+class WasRun(name: String) {
+    var wasRun: Boolean = false
+    fun run() {
+        testMethod()
+    }
+    private fun testMethod() {
+        wasRun = true
+    }
+}
+
+fun main() {
+    val test = WasRun("testMethod")
+    println(test.wasRun)
+    test.run()
+    println(test.wasRun)
 }
