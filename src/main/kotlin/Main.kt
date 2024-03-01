@@ -19,9 +19,10 @@ open class TestCase(private val testMethodName: String) {
     }
 }
 
-class TestResult(private var runCount: Int = 0) {
-    fun summary() = "$runCount run, 0 failed"
+class TestResult(private var runCount: Int = 0, private var failureCount: Int = 0) {
+    fun summary() = "$runCount run, $failureCount failed"
     fun testStarted() = runCount++
+    fun testFailed() = failureCount++
 }
 
 class WasRun(testMethodName: String): TestCase(testMethodName) {
@@ -41,9 +42,16 @@ class TestCaseTest(testMethodName: String) : TestCase(testMethodName) {
         val result = test.run()
         assert(result.summary() == "1 run, 0 failed")
     }
+    fun testFailedResultFormatting() {
+        val testResult = TestResult()
+        testResult.testStarted()
+        testResult.testFailed()
+        assert(testResult.summary() == "1 run, 1 failed")
+    }
 }
 
 fun main() {
     TestCaseTest("testTemplateMethod").run()
     TestCaseTest("testResult").run()
+    TestCaseTest("testFailedResultFormatting").run()
 }
