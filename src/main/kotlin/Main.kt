@@ -11,15 +11,25 @@ open class TestCase(private val testMethodName: String) {
     fun run(): TestResult {
         val testResult = TestResult()
         testResult.testStarted()
-        setUp()
         try {
-            val method: Method = this::class.java.getDeclaredMethod(this.testMethodName)
-            method.invoke(this)
+            setUp()
+            invokeTestMethod()
         } catch (e: Exception) {
             testResult.testFailed()
         }
         tearDown()
         return testResult
+    }
+
+    private fun invokeTestMethod() {
+        val method: Method = this::class.java.getDeclaredMethod(this.testMethodName)
+        method.invoke(this)
+    }
+}
+
+class BrokenSetUpTestCase : TestCase("") {
+    override fun setUp() {
+        throw Exception()
     }
 }
 
@@ -60,6 +70,14 @@ class TestCaseTest(testMethodName: String) : TestCase(testMethodName) {
         val result = test.run()
         assert(result.summary() == "1 run, 1 failed")
     }
+    fun testSetUpFailedResult() {
+        val test = BrokenSetUpTestCase()
+        try {
+            test.setUp()
+        } catch (_: Exception) {}
+        val testResult = test.run()
+        assert(testResult.summary() == "1 run, 1 failed")
+    }
 }
 
 fun main() {
@@ -67,4 +85,5 @@ fun main() {
     TestCaseTest("testResult").run()
     TestCaseTest("testFailedResultFormatting").run()
     TestCaseTest("testFailedResult").run()
+    TestCaseTest("").testSetUpFailedResult()
 }
