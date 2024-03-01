@@ -14,6 +14,11 @@ open class TestCase(private val testMethodName: String) {
         result.testStarted()
         try {
             setUp()
+        } catch (e: Exception) {
+            result.testError()
+            return
+        }
+        try {
             invokeTestMethod()
         } catch (e: Exception) {
             result.testFailed()
@@ -104,7 +109,7 @@ class TestCaseTest(testMethodName: String) : TestCase(testMethodName) {
         assert(result.summary() == "1 run, 1 failed")
     }
 
-    fun testSetUpFailedResult() {
+    fun testErrorResult() {
         val test = BrokenSetUpTestCase()
         try {
             test.setUp()
@@ -112,7 +117,7 @@ class TestCaseTest(testMethodName: String) : TestCase(testMethodName) {
         }
         val result = TestResult()
         test.run(result)
-        assert(result.summary() == "1 run, 1 failed")
+        assert(result.summary() == "1 run, 0 failed, 1 errors")
     }
 
     fun testSuite() {
@@ -133,7 +138,7 @@ fun main() {
     suite.add(TestCaseTest("testFailedResultFormatting"))
     suite.add(TestCaseTest("testErrorResultFormatting"))
     suite.add(TestCaseTest("testFailedResult"))
-    suite.add(TestCaseTest("testSetUpFailedResult"))
+    suite.add(TestCaseTest("testErrorResult"))
     suite.add(TestCaseTest("testSuite"))
     suite.run(result)
     println(result.summary())
