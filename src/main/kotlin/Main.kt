@@ -31,10 +31,11 @@ class BrokenSetUpTestCase : TestCase("") {
     }
 }
 
-class TestResult(private var runCount: Int = 0, private var failureCount: Int = 0) {
-    fun summary() = "$runCount run, $failureCount failed"
+class TestResult(private var runCount: Int = 0, private var failureCount: Int = 0, private var errorCount: Int = 0) {
+    fun summary() = "$runCount run, $failureCount failed" + if (errorCount > 0) { ", $errorCount errors"} else {""}
     fun testStarted() = runCount++
     fun testFailed() = failureCount++
+    fun testError() = errorCount++
 }
 
 class WasRun(testMethodName: String): TestCase(testMethodName) {
@@ -77,6 +78,12 @@ class TestCaseTest(testMethodName: String) : TestCase(testMethodName) {
         testResult.testFailed()
         assert(testResult.summary() == "1 run, 1 failed")
     }
+    fun testErrorResultFormatting() {
+        val testResult = TestResult()
+        testResult.testStarted()
+        testResult.testError()
+        assert(testResult.summary() == "1 run, 0 failed, 1 errors")
+    }
     fun testFailedResult() {
         val test = WasRun("testBrokenMethod")
         val result = TestResult()
@@ -108,6 +115,7 @@ fun main() {
     suite.add(TestCaseTest("testTemplateMethod"))
     suite.add(TestCaseTest("testResult"))
     suite.add(TestCaseTest("testFailedResultFormatting"))
+    suite.add(TestCaseTest("testErrorResultFormatting"))
     suite.add(TestCaseTest("testFailedResult"))
     suite.add(TestCaseTest("testSetUpFailedResult"))
     suite.add(TestCaseTest("testSuite"))
