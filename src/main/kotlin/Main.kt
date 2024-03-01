@@ -8,17 +8,15 @@ open class TestCase(private val testMethodName: String) {
     open fun tearDown() {
         log += "tearDown "
     }
-    fun run(): TestResult {
-        val testResult = TestResult()
-        testResult.testStarted()
+    fun run(result: TestResult) {
+        result.testStarted()
         try {
             setUp()
             invokeTestMethod()
         } catch (e: Exception) {
-            testResult.testFailed()
+            result.testFailed()
         }
         tearDown()
-        return testResult
     }
 
     private fun invokeTestMethod() {
@@ -48,15 +46,29 @@ class WasRun(testMethodName: String): TestCase(testMethodName) {
     }
 }
 
+class TestSuite {
+    private var tests: List<TestCase> = listOf()
+    fun add(test: TestCase) {
+        tests = tests + test
+    }
+    fun run(result: TestResult) {
+        for (test in tests) {
+            test.run(result)
+        }
+    }
+}
+
 class TestCaseTest(testMethodName: String) : TestCase(testMethodName) {
     fun testTemplateMethod() {
         val test = WasRun("testMethod")
-        test.run()
+        val result = TestResult()
+        test.run(result)
         assert(test.log == "setUp testMethod tearDown ")
     }
     fun testResult() {
         val test = WasRun("testMethod")
-        val result = test.run()
+        val result = TestResult()
+        test.run(result)
         assert(result.summary() == "1 run, 0 failed")
     }
     fun testFailedResultFormatting() {
@@ -67,7 +79,8 @@ class TestCaseTest(testMethodName: String) : TestCase(testMethodName) {
     }
     fun testFailedResult() {
         val test = WasRun("testBrokenMethod")
-        val result = test.run()
+        val result = TestResult()
+        test.run(result)
         assert(result.summary() == "1 run, 1 failed")
     }
     fun testSetUpFailedResult() {
@@ -75,15 +88,29 @@ class TestCaseTest(testMethodName: String) : TestCase(testMethodName) {
         try {
             test.setUp()
         } catch (_: Exception) {}
-        val testResult = test.run()
-        assert(testResult.summary() == "1 run, 1 failed")
+        val result = TestResult()
+        test.run(result)
+        assert(result.summary() == "1 run, 1 failed")
+    }
+    fun testSuite() {
+        val suite = TestSuite()
+        suite.add(WasRun("testMethod"))
+        suite.add(WasRun("testMethod"))
+        val result = TestResult()
+        suite.run(result)
+        assert(result.summary() == "2 run, 0 failed")
     }
 }
 
 fun main() {
-    TestCaseTest("testTemplateMethod").run()
-    TestCaseTest("testResult").run()
-    TestCaseTest("testFailedResultFormatting").run()
-    TestCaseTest("testFailedResult").run()
-    TestCaseTest("").testSetUpFailedResult()
+    val result = TestResult()
+    val suite = TestSuite()
+    suite.add(TestCaseTest("testTemplateMethod"))
+    suite.add(TestCaseTest("testResult"))
+    suite.add(TestCaseTest("testFailedResultFormatting"))
+    suite.add(TestCaseTest("testFailedResult"))
+    suite.add(TestCaseTest("testSetUpFailedResult"))
+    suite.add(TestCaseTest("testSuite"))
+    suite.run(result)
+    println(result.summary())
 }
