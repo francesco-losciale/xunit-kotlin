@@ -1,11 +1,9 @@
 import java.lang.reflect.Method
 
 open class TestCase(private val testMethodName: String) {
-    var wasSetUp: Boolean = false
-    var wasRun: Boolean = false
+    var log: String = ""
     open fun setUp() {
-        wasSetUp = true
-        wasRun = false
+        log += "setUp "
     }
     fun run() {
         setUp()
@@ -16,7 +14,7 @@ open class TestCase(private val testMethodName: String) {
 
 class WasRun(testMethodName: String): TestCase(testMethodName) {
     fun testMethod() {
-        wasRun = true
+        log += "testMethod "
     }
 }
 
@@ -27,11 +25,11 @@ class TestCaseTest(testMethodName: String) : TestCase(testMethodName) {
     }
     fun testRunning() {
         test.run()
-        assert(test.wasRun)
+        assert(test.log == "setUp testMethod ")
     }
     fun testSetUp() {
         test.run()
-        assert(test.wasSetUp)
+        assert(test.log == "setUp testMethod ")
     }
 }
 
