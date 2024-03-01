@@ -20,6 +20,7 @@ open class TestCase(private val testMethodName: String) {
         }
         try {
             invokeTestMethod()
+            log += "$testMethodName "
         } catch (e: Exception) {
             result.testFailed()
         }
@@ -52,7 +53,6 @@ class TestResult(private var runCount: Int = 0, private var failureCount: Int = 
 
 class WasRun(testMethodName: String) : TestCase(testMethodName) {
     fun testMethod() {
-        log += "testMethod "
     }
 
     fun testBrokenMethod() {
