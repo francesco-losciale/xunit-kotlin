@@ -5,10 +5,14 @@ open class TestCase(private val testMethodName: String) {
     open fun setUp() {
         log += "setUp "
     }
+    open fun tearDown() {
+        log += "tearDown "
+    }
     fun run() {
         setUp()
         val method: Method = this::class.java.getDeclaredMethod(this.testMethodName)
         method.invoke(this)
+        tearDown()
     }
 }
 
@@ -22,7 +26,7 @@ class TestCaseTest(testMethodName: String) : TestCase(testMethodName) {
     fun testTemplateMethod() {
         val test = WasRun("testMethod")
         test.run()
-        assert(test.log == "setUp testMethod ")
+        assert(test.log == "setUp testMethod tearDown ")
     }
 }
 
